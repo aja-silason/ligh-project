@@ -1,78 +1,79 @@
-const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-const ctx = canvas.getContext("2d")!;
-const width = canvas.width;
-const height = canvas.height;
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import GUI from 'lil-gui';
 
-// Vetor utilitário
-class Vec3 {
-  constructor(public x: number, public y: number, public z: number) {}
+// Cena
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('black');
 
-  add(v: Vec3) {
-    return new Vec3(this.x + v.x, this.y + v.y, this.z + v.z);
-  }
+// Câmera
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 5);
 
-  sub(v: Vec3) {
-    return new Vec3(this.x - v.x, this.y - v.y, this.z - v.z);
-  }
+// Renderizador
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(600, 400);
+document.body.appendChild(renderer.domElement);
 
-  mul(t: number) {
-    return new Vec3(this.x * t, this.y * t, this.z * t);
-  }
+// Controles
+const controls = new OrbitControls(camera, renderer.domElement);
 
-  dot(v: Vec3) {
-    return this.x * v.x + this.y * v.y + this.z * v.z;
-  }
+// Geometria e Material da Esfera
+const geometry = new THREE.SphereGeometry(1, 64, 64);
+const material = new THREE.MeshStandardMaterial({
+  color: 'red',
+  roughness: 0.3,
+  metalness: 0.4,
+});
+const sphere = new THREE.Mesh(geometry, material);
+scene.add(sphere);
 
-  normalize() {
-    const len = Math.sqrt(this.dot(this));
-    return this.mul(1 / len);
-  }
+// Luz Ambiente
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+scene.add(ambientLight);
+
+// Luz Direcional
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+directionalLight.position.set(3, 3, 3);
+scene.add(directionalLight);
+
+// Alvo da luz
+const lightTarget = new THREE.Object3D();
+lightTarget.position.set(0, 0, 0);
+scene.add(lightTarget);
+directionalLight.target = lightTarget;
+
+// GUI
+const gui = new GUI();
+
+const sphereFolder = gui.addFolder('Esfera');
+const spherePos = { x: 0, y: 0, z: 0 };
+sphereFolder.add(spherePos, 'x', -3, 3, 0.1).onChange(() => {
+  sphere.position.x = spherePos.x;
+});
+sphereFolder.add(spherePos, 'y', -3, 3, 0.1).onChange(() => {
+  sphere.position.y = spherePos.y;
+});
+sphereFolder.add(spherePos, 'z', -3, 3, 0.1).onChange(() => {
+  sphere.position.z = spherePos.z;
+});
+
+const lightFolder = gui.addFolder('Luz');
+const lightPos = { x: 3, y: 3, z: 3 };
+lightFolder.add(lightPos, 'x', -5, 5, 0.1).onChange(() => {
+  directionalLight.position.x = lightPos.x;
+});
+lightFolder.add(lightPos, 'y', -5, 5, 0.1).onChange(() => {
+  directionalLight.position.y = lightPos.y;
+});
+lightFolder.add(lightPos, 'z', -5, 5, 0.1).onChange(() => {
+  directionalLight.position.z = lightPos.z;
+});
+
+// Loop de animação
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
 }
-
-// Esfera e luz
-const sphereCenter = new Vec3(0, 0, -1);
-const sphereRadius = 0.5;
-const lightDir = new Vec3(1, 1, -1).normalize();
-
-function rayColor(rayOrigin: Vec3, rayDir: Vec3): [number, number, number] {
-  const oc = rayOrigin.sub(sphereCenter);
-  const a = rayDir.dot(rayDir);
-  const b = 2.0 * oc.dot(rayDir);
-  const c = oc.dot(oc) - sphereRadius * sphereRadius;
-  const discriminant = b * b - 4 * a * c;
-
-  if (discriminant > 0) {
-    const t = (-b - Math.sqrt(discriminant)) / (2.0 * a);
-    const hitPoint = rayOrigin.add(rayDir.mul(t));
-    const normal = hitPoint.sub(sphereCenter).normalize();
-    const lightIntensity = Math.max(0, normal.dot(lightDir));
-    const color = 255 * lightIntensity;
-    return [color, color, color];
-  }
-
-  return [30, 30, 30]; // Cor de fundo (sombra)
-}
-
-function render() {
-  const imageData = ctx.createImageData(width, height);
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const u = (x / width) * 2 - 1;
-      const v = (y / height) * 2 - 1;
-      const rayOrigin = new Vec3(0, 0, 0);
-      const rayDir = new Vec3(u, -v, -1).normalize();
-      const [r, g, b] = rayColor(rayOrigin, rayDir);
-
-      const index = (y * width + x) * 4;
-      imageData.data[index] = r;
-      imageData.data[index + 1] = g;
-      imageData.data[index + 2] = b;
-      imageData.data[index + 3] = 255;
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-}
-
-render();
+animate();
