@@ -1,4 +1,4 @@
-# Projecto - Esfera com Reflexão
+# Projecto - Esfera com Reflexão de Luz
 
     Este é um projecto entregue como um dos trabalhos da cadeira de Computação Gráfica, que servirá de nota para o mesmo.
 
