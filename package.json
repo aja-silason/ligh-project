@@ -1,8 +1,9 @@
 {
-  "name": "Esfera com Reflexão",
+  "name": "Esfera vermelha, tarefa 3",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "author": "Anania Augusto",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

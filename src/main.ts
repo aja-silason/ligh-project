@@ -38,6 +38,18 @@ directionalLight.target = lightTarget;
 
 const gui = new GUI();
 
+const lightFolder = gui.addFolder('Iluminação');
+const lightPos = { x: 3, y: 3, z: 3 };
+lightFolder.add(lightPos, 'x', -5, 5, 0.1).onChange(() => {
+  directionalLight.position.x = lightPos.x;
+});
+lightFolder.add(lightPos, 'y', -5, 5, 0.1).onChange(() => {
+  directionalLight.position.y = lightPos.y;
+});
+lightFolder.add(lightPos, 'z', -5, 5, 0.1).onChange(() => {
+  directionalLight.position.z = lightPos.z;
+});
+
 const sphereFolder = gui.addFolder('Esfera');
 const spherePos = { x: 0, y: 0, z: 0 };
 sphereFolder.add(spherePos, 'x', -3, 3, 0.1).onChange(() => {
@@ -48,18 +60,6 @@ sphereFolder.add(spherePos, 'y', -3, 3, 0.1).onChange(() => {
 });
 sphereFolder.add(spherePos, 'z', -3, 3, 0.1).onChange(() => {
   sphere.position.z = spherePos.z;
-});
-
-const lightFolder = gui.addFolder('Luz');
-const lightPos = { x: 3, y: 3, z: 3 };
-lightFolder.add(lightPos, 'x', -5, 5, 0.1).onChange(() => {
-  directionalLight.position.x = lightPos.x;
-});
-lightFolder.add(lightPos, 'y', -5, 5, 0.1).onChange(() => {
-  directionalLight.position.y = lightPos.y;
-});
-lightFolder.add(lightPos, 'z', -5, 5, 0.1).onChange(() => {
-  directionalLight.position.z = lightPos.z;
 });
 
 function animate() {
